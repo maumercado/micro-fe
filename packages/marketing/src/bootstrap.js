@@ -1,18 +1,35 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
+import { createMemoryHistory } from 'history'
 import App from './App'
 
-const mount = (el) => {
+const mount = (el, { onNavigate }) => {
+  const history = createMemoryHistory()
+
+  if (onNavigate && typeof onNavigate === 'function') {
+    history.listen(onNavigate)
+  }
+
   ReactDOM.render(
-    <App />,
+    <App history={history} />,
     el
   )
+
+  return {
+    onParentNavigate ({ pathname: nextPathName }) {
+      const { pathname } = history.location
+
+      if (pathname !== nextPathName) {
+        history.push(nextPathName)
+      }
+    }
+  }
 }
 
 if (process.env.NODE_ENV === 'development') {
   const devRoot = document.querySelector('#_marketing-dev-root')
   if (devRoot) {
-    mount(devRoot)
+    mount(devRoot, {})
   }
 }
 
